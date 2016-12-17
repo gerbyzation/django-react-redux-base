@@ -48,10 +48,11 @@ describe('Home View Tests (Container):', () => {
                 return expect(wrapper).to.be.ok;
             });
 
-            it('should have two img, one h1, one p and one alert alert-info div ', () => {
+            it('should have two img, one h1, one p, one a and one alert alert-info div ', () => {
                 expect(wrapper.find('img')).to.have.length(2);
                 expect(wrapper.find('h1')).to.have.length(1);
                 expect(wrapper.find('p')).to.have.length(1);
+                expect(wrapper.find('a')).to.have.length(1);
 
                 const div = wrapper.find('div.alert.alert-info');
                 expect(div).to.have.length(1);

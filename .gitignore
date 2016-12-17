@@ -41,3 +41,8 @@ shippable/
 
 # not include scripts because they come from external module
 scripts/
+
+# Docker volume data
+*.rdb
+*.pid
+celerybeat-schedule.*
