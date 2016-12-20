@@ -1,12 +1,9 @@
 const path = require('path');
 const autoprefixer = require('autoprefixer');
-const postcssImport = require('postcss-import');
 const merge = require('webpack-merge');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-
-require('babel-polyfill').default;
 
 const TARGET = process.env.npm_lifecycle_event;
 
@@ -31,7 +28,6 @@ const VENDOR = [
     'font-awesome-webpack!./styles/font-awesome.config.prod.js'
 ];
 
-// process.env.BABEL_ENV = TARGET;
 const basePath = path.resolve(__dirname, '../src/static/');
 
 const common = {
@@ -130,37 +126,10 @@ const common = {
             {
                 test: /\.json(\?.*)?$/,
                 loader: 'file-loader?name=/files/[name].[ext]'
-            },
-            // {
-            //     test: require.resolve("jquery"),
-            //     loader: "expose-loader?$!expose-loader?jQuery"
-            // }
+            }
         ]
     },
-
-    // sassLoader: {
-    //     data: `@import "${__dirname}/../src/static/styles/config/_variables.scss";`
-    // },
-
-    // postcss: (param) => {
-    //     return [
-    //         autoprefixer({
-    //             browsers: ['last 2 versions']
-    //         }),
-    //         postcssImport({
-    //             addDependencyTo: param
-    //         })
-    //     ];
-    // }
 };
-
-// if (TARGET === 'dev' || !TARGET) {
-//     module.exports = merge(development, common);
-// }
-//
-// if (TARGET === 'prod' || !TARGET) {
-//     module.exports = merge(production, common);
-// }
 
 switch (TARGET) {
     case 'dev':
