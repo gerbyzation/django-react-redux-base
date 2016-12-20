@@ -1,7 +1,8 @@
 /* eslint import/no-extraneous-dependencies: ["error", {"devDependencies": true}] */
+// require('babel-register');
 
-import jsdom from 'jsdom';
-import register from 'ignore-styles';
+const jsdom = require('jsdom');
+const register = require('ignore-styles').default;
 
 register(['.scss', '.sass', '.css', '.png', '.jpeg']);
 

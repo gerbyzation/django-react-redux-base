@@ -1,31 +1,47 @@
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
+const extractCSS = new ExtractTextPlugin('styles/[name].css');
+
 module.exports = {
     devtool: 'source-map', // 'cheap-module-eval-source-map',
-
-    entry: {
-        vendor: [
-            'bootstrap-loader',
-            'font-awesome-webpack!./src/static/styles/font-awesome.config.js'
-        ]
-    },
-
+    // entry: {
+    //     vendor: [
+    //         'font-awesome-webpack!./src/static/styles/font-awesome.config.js'
+    //     ]
+    // },
     module: {
-        loaders: [{
+        rules: [{
+            test: /\.css$/,
+            use: [
+                extractCSS.extract('style'),
+                'css-loader?localIdentName=[path][name]--[local]',
+                'postcss-loader'
+            ]
+        }, {
             test: /\.scss$/,
-            loader: 'style!css?localIdentName=[path][name]--[local]!postcss-loader!sass'
-        }]
+            use: [
+                extractCSS.extract('style'),
+                'css-loader?localIdentName=[path][name]--[local]',
+                'postcss-loader',
+                'sass-loader',
+            ]
+        }],
     },
-
+    // module: {
+    //     loaders: [{
+    //         test: /\.scss$/,
+    //         loader: 'style!css?localIdentName=[path][name]--[local]!postcss-loader!sass'
+    //     }]
+    // },
     plugins: [
-        new webpack.DefinePlugin({
-            'process.env': {
-                NODE_ENV: '"development"'
-            },
-            '__DEVELOPMENT__': true
-        }),
-        new ExtractTextPlugin('styles/[name].[contenthash].css'),
-        new webpack.optimize.OccurrenceOrderPlugin()
+        // new webpack.DefinePlugin({
+        //     'process.env': {
+        //         NODE_ENV: '"development"'
+        //     },
+        //     '__DEVELOPMENT__': true
+        // }),
+        extractCSS,
+        // new webpack.optimize.OccurrenceOrderPlugin()
     ]
 };

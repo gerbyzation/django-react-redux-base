@@ -6,10 +6,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 
-
-const development = require('./dev.config');
-const production = require('./prod.config');
-
 require('babel-polyfill').default;
 
 const TARGET = process.env.npm_lifecycle_event;
@@ -20,8 +16,8 @@ const PATHS = {
 };
 
 const VENDOR = [
-    'history',
     'babel-polyfill',
+    'history',
     'react',
     'react-dom',
     'react-redux',
@@ -30,57 +26,82 @@ const VENDOR = [
     'classnames',
     'redux',
     'react-router-redux',
-    'jquery'
+    'jquery',
+    'bootstrap-loader',
+    'font-awesome-webpack!./styles/font-awesome.config.prod.js'
 ];
 
-process.env.BABEL_ENV = TARGET;
+// process.env.BABEL_ENV = TARGET;
+const basePath = path.resolve(__dirname, '../src/static/');
 
 const common = {
+    context: basePath,
     entry: {
-        app: PATHS.app,
-        vendor: VENDOR
+        vendor: VENDOR,
+        app: PATHS.app
     },
-
     output: {
         filename: '[name].[hash].js',
         path: PATHS.build,
         publicPath: '/static'
     },
-
     plugins: [
+        // extract all common modules to vendor so we can load multiple apps in one page
+        new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: 'vendor.[hash].js' }),
+        new webpack.LoaderOptionsPlugin({
+            test: /\.scss$/,
+            options: {
+                postcss: [
+                    autoprefixer({ browsers: ['last 2 versions'] })
+                ],
+                sassLoader: {
+                    data: `@import "${__dirname}/../src/static/styles/config/_variables.scss";`
+                }
+            }
+        }),
+        new webpack.LoaderOptionsPlugin({
+            test: /\.css$/,
+            options: {
+                postcss: [
+                    autoprefixer({ browsers: ['last 2 versions'] })
+                ]
+            }
+        }),
         new HtmlWebpackPlugin({
             template: path.join(__dirname, '../src/static/index.html'),
             hash: true,
             filename: 'index.html',
             inject: 'body'
         }),
+        new webpack.DefinePlugin({
+            'process.env': { NODE_ENV: TARGET === 'dev' ? '"development"' : '"production"' },
+            '__DEVELOPMENT__': TARGET === 'dev'
+        }),
         new webpack.ProvidePlugin({
             '$': 'jquery',
             'jQuery': 'jquery',
             'window.jQuery': 'jquery'
         }),
-        // extract all common modules to vendor so we can load multiple apps in one page
-        new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: 'vendor.[hash].js' }),
         new CleanWebpackPlugin([PATHS.build], {
             root: process.cwd()
         })
     ],
-
     resolve: {
-        extensions: ['', '.jsx', '.js', '.json', '.scss'],
-        modulesDirectories: ['node_modules', PATHS.app]
+        extensions: ['.jsx', '.js', '.json', '.scss', '.css'],
+        modules: ['node_modules']
     },
-
     module: {
-        loaders: [
+        rules: [
             {
                 test: /\.js$/,
-                loaders: ['babel-loader'],
+                use: [
+                    { loader: 'babel-loader' }
+                ],
                 exclude: /node_modules/
             },
             {
                 test: /\.jpe?g$|\.gif$|\.png$/,
-                loader: 'file?name=/images/[name].[ext]?[hash]'
+                loader: 'file-loader?name=/images/[name].[ext]?[hash]'
             },
             {
                 test: /\.woff(\?.*)?$/,
@@ -109,30 +130,45 @@ const common = {
             {
                 test: /\.json(\?.*)?$/,
                 loader: 'file-loader?name=/files/[name].[ext]'
-            }
+            },
+            // {
+            //     test: require.resolve("jquery"),
+            //     loader: "expose-loader?$!expose-loader?jQuery"
+            // }
         ]
     },
 
-    sassLoader: {
-        data: `@import "${__dirname}/../src/static/styles/config/_variables.scss";`
-    },
+    // sassLoader: {
+    //     data: `@import "${__dirname}/../src/static/styles/config/_variables.scss";`
+    // },
 
-    postcss: (param) => {
-        return [
-            autoprefixer({
-                browsers: ['last 2 versions']
-            }),
-            postcssImport({
-                addDependencyTo: param
-            })
-        ];
-    }
+    // postcss: (param) => {
+    //     return [
+    //         autoprefixer({
+    //             browsers: ['last 2 versions']
+    //         }),
+    //         postcssImport({
+    //             addDependencyTo: param
+    //         })
+    //     ];
+    // }
 };
 
-if (TARGET === 'dev' || !TARGET) {
-    module.exports = merge(development, common);
-}
+// if (TARGET === 'dev' || !TARGET) {
+//     module.exports = merge(development, common);
+// }
+//
+// if (TARGET === 'prod' || !TARGET) {
+//     module.exports = merge(production, common);
+// }
 
-if (TARGET === 'prod' || !TARGET) {
-    module.exports = merge(production, common);
+switch (TARGET) {
+    case 'dev':
+        module.exports = merge(require('./dev.config'), common);
+        break;
+    case 'prod':
+        module.exports = merge(require('./prod.config'), common);
+        break;
+    default:
+        module.exports = common;
 }
