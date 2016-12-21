@@ -7,6 +7,8 @@ import t from 'tcomb-form';
 
 import * as actionCreators from '../../actions/auth';
 
+import { Message } from 'semantic-ui-react';
+
 const Form = t.form.Form;
 
 const Login = t.struct({
