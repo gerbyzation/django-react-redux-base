@@ -5,7 +5,7 @@ import { push } from 'react-router-redux';
 import classNames from 'classnames';
 
 import { authLogoutAndRedirect } from './actions/auth';
-import './styles/main.scss';
+// import './styles/main.scss';
 
 import { Icon, Container, Menu } from 'semantic-ui-react';
 
